@@ -30,6 +30,10 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
 
             multiQueue.put(queue, newQueue);
         }
+        else{
+            throw new IllegalArgumentException();
+
+        }
 
     }
 
