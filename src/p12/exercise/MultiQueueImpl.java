@@ -29,8 +29,7 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
             List<T> newQueue = new ArrayList<>();
 
             multiQueue.put(queue, newQueue);
-        }
-        else{
+        } else {
             throw new IllegalArgumentException();
 
         }
@@ -39,24 +38,38 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
 
     @Override
     public boolean isQueueEmpty(Q queue) {
-        return multiQueue.get(queue).isEmpty();
+        if (availableQueues().contains(queue)) {
+            return multiQueue.get(queue).isEmpty();
+        } else {
+            throw new IllegalArgumentException();
+
+        }
     }
 
     @Override
     public void enqueue(T elem, Q queue) {
 
-        multiQueue.get(queue).addLast(elem);
+        if (availableQueues().contains(queue)) {
+            multiQueue.get(queue).addLast(elem);
+        } else {
+            throw new IllegalArgumentException();
+
+        }
 
     }
 
     @Override
     public T dequeue(Q queue) {
-        if (!multiQueue.get(queue).isEmpty()) {
-            return multiQueue.get(queue).removeFirst();
+        if (availableQueues().contains(queue)) {
+            if (!multiQueue.get(queue).isEmpty()) {
+                return multiQueue.get(queue).removeFirst();
+            } else {
+                return null;
+            }
         } else {
-            return null;
-        }
+            throw new IllegalArgumentException();
 
+        }
     }
 
     @Override
@@ -85,25 +98,39 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q> {
 
     @Override
     public List<T> dequeueAllFromQueue(Q queue) {
-        List<T> listDequeue = new ArrayList<>();
+        if (availableQueues().contains(queue)) {
+            List<T> listDequeue = new ArrayList<>();
 
-        while (!multiQueue.get(queue).isEmpty()) {
-            listDequeue.addLast(dequeue(queue));
+            while (!multiQueue.get(queue).isEmpty()) {
+                listDequeue.addLast(dequeue(queue));
+            }
+            return listDequeue;
+
+        } else {
+            throw new IllegalArgumentException();
+
         }
-        return listDequeue;
-
     }
 
     @Override
     public void closeQueueAndReallocate(Q queue) {
-        List<T> reallocatedListDequeue = dequeueAllFromQueue(queue);
-        multiQueue.remove(queue);
+        if (availableQueues().contains(queue)) {
+            List<T> reallocatedListDequeue = dequeueAllFromQueue(queue);
+            multiQueue.remove(queue);
 
-        while (!reallocatedListDequeue.isEmpty()) {
-            multiQueue.get(availableQueues().iterator().next()).add(reallocatedListDequeue.removeFirst());
+            if (!availableQueues().isEmpty()) {
+
+                while (!reallocatedListDequeue.isEmpty()) {
+                    multiQueue.get(availableQueues().iterator().next()).add(reallocatedListDequeue.removeFirst());
+                }
+            } else {
+                throw new IllegalStateException();
+            }
+
+        } else {
+            throw new IllegalArgumentException();
 
         }
 
     }
-
 }
